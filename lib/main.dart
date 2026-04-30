@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trip_organizer_project/core/theme/app_theme.dart';
 import 'package:trip_organizer_project/presentation/screens/budget/budget_screen.dart';
+import 'package:trip_organizer_project/presentation/screens/home_screen.dart';
 
 void main() {
   runApp(const VoyageApp());
@@ -15,7 +16,10 @@ class VoyageApp extends StatelessWidget {
       title: 'Voyage',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const BudgetScreen(),
+      routes: {
+        '/': (context) => HomeScreen(),
+        '/budget': (context) => const BudgetScreen(),
+      }
     );
   }
 }

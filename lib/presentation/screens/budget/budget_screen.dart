@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:trip_organizer_project/core/constants/app_colors.dart';
 import 'package:trip_organizer_project/data/models/budget_model.dart';
 import 'package:trip_organizer_project/data/models/transaction_model.dart';
+import 'package:trip_organizer_project/presentation/widgets/bottom_nav_bar.dart';
 import 'package:trip_organizer_project/presentation/widgets/budget_card.dart';
 import 'package:trip_organizer_project/presentation/widgets/category_chip.dart';
 import 'package:trip_organizer_project/presentation/widgets/transaction_item.dart';
@@ -14,7 +15,6 @@ class BudgetScreen extends StatefulWidget {
 }
 
 class _BudgetScreenState extends State<BudgetScreen> {
-  int _selectedNavIndex = 1; // Budget tab active
   String _selectedCategory = 'All';
 
   final Budget _budget = const Budget(
@@ -88,12 +88,6 @@ class _BudgetScreenState extends State<BudgetScreen> {
       }
       return true;
     }).toList();
-  }
-
-  void _onNavTap(int index) {
-    setState(() {
-      _selectedNavIndex = index;
-    });
   }
 
   void _onCategoryTap(String category) {
@@ -240,28 +234,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
         elevation: 4,
         child: const Icon(Icons.add, size: 28),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedNavIndex,
-        onTap: _onNavTap,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today_outlined),
-            label: 'Itinerary',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet),
-            label: 'Budget',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Profile',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            label: 'Settings',
-          ),
-        ],
-      ),
+      bottomNavigationBar: const MyBottomNavBar(selectedIndex: 1)
     );
   }
 }
