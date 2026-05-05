@@ -97,7 +97,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
   }
 
   void _onAddExpense() {
-    // TODO: Navigate to add expense screen
+    Navigator.pushNamed(context, '/add_expense');
   }
 
   @override

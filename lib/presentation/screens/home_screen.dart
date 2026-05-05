@@ -16,11 +16,10 @@ class HomeScreen extends StatelessWidget {
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 12,
             children: [
               CircleAvatar(
                 radius: 86,
-                backgroundColor: AppColors.primary.withValues(alpha: 0.3),
+                backgroundColor: AppColors.primary.withOpacity(0.3),
                 child: Icon(Icons.directions_boat_rounded, size: 86),
               ),
               SizedBox(height: 12),
@@ -32,6 +31,7 @@ class HomeScreen extends StatelessWidget {
                   color: AppColors.textPrimary,
                 ),
               ),
+              SizedBox(height: 12),
               Text(
                 "Every great journey starts with a single step. Start planning your first trip now!",
                 textAlign: TextAlign.center,
@@ -39,7 +39,9 @@ class HomeScreen extends StatelessWidget {
               ),
               SizedBox(height:12),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushNamed(context, '/add_trip');
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFfe7d50),
                   shape: RoundedRectangleBorder(
@@ -54,12 +56,14 @@ class HomeScreen extends StatelessWidget {
               ),
               SizedBox(height: 12),
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  Navigator.pushNamed(context, '/browse_destinations');
+                },
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  spacing: 8,
                   children: [
                     Icon(Icons.auto_awesome, color: AppColors.primary),
+                    SizedBox(width: 8),
                     Text("Browse Destinations", style: TextStyle(color: AppColors.primary)),
                   ]
                 )
