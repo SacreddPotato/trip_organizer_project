@@ -9,7 +9,13 @@ class SecurityScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       appBar: AppBar(
-        title: const Text('Security', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Security',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
@@ -19,7 +25,14 @@ class SecurityScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Change Password', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            const Text(
+              'Change Password',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
             const SizedBox(height: 16),
             _buildPasswordField('Current Password'),
             const SizedBox(height: 12),
@@ -34,24 +47,58 @@ class SecurityScreen extends StatelessWidget {
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   elevation: 0,
                 ),
-                child: const Text('Update Password', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                child: const Text(
+                  'Update Password',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 40),
-            const Text('Two-Factor Authentication', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            const Text(
+              'Two-Factor Authentication',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
             const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
                 color: AppColors.cardBg,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: SwitchListTile(
-                title: const Text('Enable 2FA', style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                subtitle: const Text('Add an extra layer of security.', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                title: const Text(
+                  'Enable 2FA',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                subtitle: const Text(
+                  'Add an extra layer of security.',
+                  style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 12,
+                  ),
+                ),
                 value: false,
                 onChanged: (v) {},
                 activeColor: AppColors.primary,
@@ -71,8 +118,14 @@ class SecurityScreen extends StatelessWidget {
         labelStyle: const TextStyle(color: AppColors.textSecondary),
         filled: true,
         fillColor: AppColors.cardBg,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 16,
+        ),
       ),
     );
   }

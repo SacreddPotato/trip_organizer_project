@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:trip_organizer_project/core/app_store.dart';
 import 'package:trip_organizer_project/core/constants/app_colors.dart';
 import 'package:trip_organizer_project/presentation/screens/settings/data_usage_screen.dart';
 import 'package:trip_organizer_project/presentation/screens/settings/language_screen.dart';
@@ -12,6 +14,8 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final preferences = context.watch<AppStore>().preferences;
+
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       appBar: const MyAppBar(),
@@ -32,17 +36,77 @@ class SettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               _buildSectionTitle('General'),
-              _buildSettingsTile(context, Icons.language, 'Language', 'English', const LanguageScreen()),
-              _buildSettingsTile(context, Icons.dark_mode_outlined, 'Dark Mode', 'Off', null, isSwitch: true),
+              _buildSettingsTile(
+                context,
+                Icons.language,
+                'Language',
+                'English',
+                const LanguageScreen(),
+              ),
+              _buildSettingsTile(
+                context,
+                Icons.dark_mode_outlined,
+                'Dark Mode',
+                preferences.darkModeEnabled ? 'On' : 'Off',
+                null,
+                isSwitch: true,
+                switchValue: preferences.darkModeEnabled,
+                onSwitchChanged: (value) {
+                  context.read<AppStore>().updatePreferences(
+                    darkModeEnabled: value,
+                  );
+                },
+              ),
               const SizedBox(height: 24),
               _buildSectionTitle('Account'),
-              _buildSettingsTile(context, Icons.lock_outline, 'Privacy', '', const PrivacyScreen()),
-              _buildSettingsTile(context, Icons.download_outlined, 'Data Usage', '', const DataUsageScreen()),
+              _buildSettingsTile(
+                context,
+                Icons.lock_outline,
+                'Privacy',
+                '',
+                const PrivacyScreen(),
+              ),
+              _buildSettingsTile(
+                context,
+                Icons.download_outlined,
+                'Data Usage',
+                '',
+                const DataUsageScreen(),
+              ),
               const SizedBox(height: 24),
               _buildSectionTitle('About'),
-              _buildSettingsTile(context, Icons.info_outline, 'Terms of Service', '', const SimpleInfoScreen(title: 'Terms of Service', content: 'These are the terms of service. Please read them carefully.')),
-              _buildSettingsTile(context, Icons.privacy_tip_outlined, 'Privacy Policy', '', const SimpleInfoScreen(title: 'Privacy Policy', content: 'This is the privacy policy. Your data is secure with us.')),
-              _buildSettingsTile(context, Icons.star_rate_outlined, 'Rate Us', '', const SimpleInfoScreen(title: 'Rate Us', content: 'Thank you for considering rating our app!')),
+              _buildSettingsTile(
+                context,
+                Icons.info_outline,
+                'Terms of Service',
+                '',
+                const SimpleInfoScreen(
+                  title: 'Terms of Service',
+                  content:
+                      'These are the terms of service. Please read them carefully.',
+                ),
+              ),
+              _buildSettingsTile(
+                context,
+                Icons.privacy_tip_outlined,
+                'Privacy Policy',
+                '',
+                const SimpleInfoScreen(
+                  title: 'Privacy Policy',
+                  content:
+                      'This is the privacy policy. Your data is secure with us.',
+                ),
+              ),
+              _buildSettingsTile(
+                context,
+                Icons.star_rate_outlined,
+                'Rate Us',
+                '',
+                const SimpleInfoScreen(
+                  title: 'Rate Us',
+                  content: 'Thank you for considering rating our app!',
+                ),
+              ),
             ],
           ),
         ),
@@ -65,7 +129,16 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingsTile(BuildContext context, IconData icon, String title, String subtitle, Widget? destination, {bool isSwitch = false}) {
+  Widget _buildSettingsTile(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String subtitle,
+    Widget? destination, {
+    bool isSwitch = false,
+    bool switchValue = false,
+    ValueChanged<bool>? onSwitchChanged,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -76,7 +149,7 @@ class SettingsScreen extends StatelessWidget {
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: ListTile(
@@ -92,30 +165,27 @@ class SettingsScreen extends StatelessWidget {
         subtitle: subtitle.isNotEmpty
             ? Text(
                 subtitle,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                ),
+                style: const TextStyle(color: AppColors.textSecondary),
               )
             : null,
         trailing: isSwitch
             ? Switch(
-                value: false,
-                onChanged: (val) {},
+                value: switchValue,
+                onChanged: onSwitchChanged,
                 activeColor: AppColors.primary,
               )
-            : const Icon(
-                Icons.chevron_right,
-                color: AppColors.textSecondary,
-              ),
+            : const Icon(Icons.chevron_right, color: AppColors.textSecondary),
         onTap: isSwitch
             ? null
             : () {
                 if (destination != null) {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => destination));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => destination),
+                  );
                 }
               },
       ),
     );
   }
 }
-

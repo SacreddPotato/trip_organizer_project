@@ -9,7 +9,13 @@ class BrowseDestinationsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       appBar: AppBar(
-        title: const Text('Browse Destinations', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Browse Destinations',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
@@ -25,7 +31,11 @@ class BrowseDestinationsScreen extends StatelessWidget {
                 color: AppColors.cardBg,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
                 ],
               ),
               child: const TextField(
@@ -47,10 +57,26 @@ class BrowseDestinationsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _buildDestinationCard('Kyoto, Japan', 'Temples, Gardens, Culture', Icons.landscape),
-            _buildDestinationCard('Santorini, Greece', 'Beaches, Sunsets, Food', Icons.beach_access),
-            _buildDestinationCard('Rome, Italy', 'History, Art, Architecture', Icons.account_balance),
-            _buildDestinationCard('Bali, Indonesia', 'Nature, Relaxation, Temples', Icons.park),
+            _buildDestinationCard(
+              'Kyoto, Japan',
+              'Temples, Gardens, Culture',
+              Icons.landscape,
+            ),
+            _buildDestinationCard(
+              'Santorini, Greece',
+              'Beaches, Sunsets, Food',
+              Icons.beach_access,
+            ),
+            _buildDestinationCard(
+              'Rome, Italy',
+              'History, Art, Architecture',
+              Icons.account_balance,
+            ),
+            _buildDestinationCard(
+              'Bali, Indonesia',
+              'Nature, Relaxation, Temples',
+              Icons.park,
+            ),
           ],
         ),
       ),
@@ -64,7 +90,11 @@ class BrowseDestinationsScreen extends StatelessWidget {
         color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: ListTile(
@@ -79,7 +109,11 @@ class BrowseDestinationsScreen extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
         ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4.0),
@@ -88,7 +122,11 @@ class BrowseDestinationsScreen extends StatelessWidget {
             style: const TextStyle(color: AppColors.textSecondary),
           ),
         ),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textLight),
+        trailing: const Icon(
+          Icons.arrow_forward_ios,
+          size: 16,
+          color: AppColors.textLight,
+        ),
         onTap: () {},
       ),
     );

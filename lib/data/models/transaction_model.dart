@@ -4,6 +4,7 @@ enum ExpenseType { dining, transit, shopping, activities, transport }
 
 class Transaction {
   final String id;
+  final String tripId;
   final String title;
   final double amount;
   final DateTime date;
@@ -13,6 +14,7 @@ class Transaction {
 
   const Transaction({
     required this.id,
+    required this.tripId,
     required this.title,
     required this.amount,
     required this.date,
@@ -20,6 +22,32 @@ class Transaction {
     required this.category,
     required this.iconAsset,
   });
+
+  factory Transaction.fromJson(Map<String, dynamic> json) {
+    return Transaction(
+      id: json['id'] as String,
+      tripId: json['tripId'] as String,
+      title: json['title'] as String,
+      amount: (json['amount'] as num).toDouble(),
+      date: DateTime.parse(json['date'] as String),
+      expenseType: ExpenseType.values.byName(json['expenseType'] as String),
+      category: TransactionCategory.values.byName(json['category'] as String),
+      iconAsset: json['iconAsset'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'tripId': tripId,
+      'title': title,
+      'amount': amount,
+      'date': date.toIso8601String(),
+      'expenseType': expenseType.name,
+      'category': category.name,
+      'iconAsset': iconAsset,
+    };
+  }
 
   String get formattedAmount => '-\$${amount.toStringAsFixed(2)}';
 
@@ -64,8 +92,18 @@ class Transaction {
       return 'Yesterday \u2022 $expenseTypeLabel';
     } else {
       final monthNames = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
       ];
       return '${monthNames[date.month - 1]} ${date.day} \u2022 $expenseTypeLabel';
     }

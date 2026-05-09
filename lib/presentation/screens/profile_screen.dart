@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:trip_organizer_project/core/app_store.dart';
 import 'package:trip_organizer_project/core/constants/app_colors.dart';
 import 'package:trip_organizer_project/presentation/screens/profile/edit_profile_screen.dart';
 import 'package:trip_organizer_project/presentation/screens/profile/notifications_screen.dart';
@@ -12,6 +14,11 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final profile = context.watch<AppStore>().profile;
+    final avatarUrl = profile.avatarUrl.isEmpty
+        ? 'https://i.pravatar.cc/150?img=32'
+        : profile.avatarUrl;
+
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       appBar: const MyAppBar(),
@@ -25,7 +32,7 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: 20),
               ClipOval(
                 child: Image.network(
-                  'https://i.pravatar.cc/150?img=32',
+                  avatarUrl,
                   width: 120,
                   height: 120,
                   fit: BoxFit.cover,
@@ -44,8 +51,8 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Jane Doe',
+              Text(
+                profile.name,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -53,20 +60,47 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'jane.doe@example.com',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: AppColors.textSecondary,
-                ),
+              Text(
+                profile.email,
+                style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
               ),
               const SizedBox(height: 32),
-              _buildProfileOption(context, Icons.edit, 'Edit Profile', const EditProfileScreen()),
-              _buildProfileOption(context, Icons.security, 'Security', const SecurityScreen()),
-              _buildProfileOption(context, Icons.notifications_active_outlined, 'Notifications', const NotificationsScreen()),
-              _buildProfileOption(context, Icons.help_outline, 'Help & Support', const SimpleInfoScreen(title: 'Help & Support', content: 'Contact us at support@voyageapp.com for any inquiries or assistance with your trips.')),
+              _buildProfileOption(
+                context,
+                Icons.edit,
+                'Edit Profile',
+                const EditProfileScreen(),
+              ),
+              _buildProfileOption(
+                context,
+                Icons.security,
+                'Security',
+                const SecurityScreen(),
+              ),
+              _buildProfileOption(
+                context,
+                Icons.notifications_active_outlined,
+                'Notifications',
+                const NotificationsScreen(),
+              ),
+              _buildProfileOption(
+                context,
+                Icons.help_outline,
+                'Help & Support',
+                const SimpleInfoScreen(
+                  title: 'Help & Support',
+                  content:
+                      'Contact us at support@voyageapp.com for any inquiries or assistance with your trips.',
+                ),
+              ),
               const SizedBox(height: 20),
-              _buildProfileOption(context, Icons.logout, 'Log Out', null, isDestructive: true),
+              _buildProfileOption(
+                context,
+                Icons.logout,
+                'Log Out',
+                null,
+                isDestructive: true,
+              ),
             ],
           ),
         ),
@@ -75,7 +109,13 @@ class ProfileScreen extends StatelessWidget {
   }
 
   // Helper method to keep the code clean and avoid repetition
-  Widget _buildProfileOption(BuildContext context, IconData icon, String title, Widget? destination, {bool isDestructive = false}) {
+  Widget _buildProfileOption(
+    BuildContext context,
+    IconData icon,
+    String title,
+    Widget? destination, {
+    bool isDestructive = false,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
@@ -86,7 +126,7 @@ class ProfileScreen extends StatelessWidget {
             color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: ListTile(
@@ -115,11 +155,13 @@ class ProfileScreen extends StatelessWidget {
         ),
         onTap: () {
           if (destination != null) {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => destination));
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => destination),
+            );
           }
         },
       ),
     );
   }
 }
-

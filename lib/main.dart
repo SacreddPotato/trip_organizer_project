@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:trip_organizer_project/core/app_store.dart';
 import 'package:trip_organizer_project/core/theme/app_theme.dart';
 import 'package:trip_organizer_project/presentation/screens/add_trip_screen.dart';
 import 'package:trip_organizer_project/presentation/screens/browse_destinations_screen.dart';
@@ -9,7 +11,12 @@ import 'package:trip_organizer_project/presentation/screens/profile_screen.dart'
 import 'package:trip_organizer_project/presentation/screens/settings_screen.dart';
 
 void main() {
-  runApp(const VoyageApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AppStore()..load(),
+      child: const VoyageApp(),
+    ),
+  );
 }
 
 class VoyageApp extends StatelessWidget {
@@ -29,7 +36,7 @@ class VoyageApp extends StatelessWidget {
         '/add_trip': (context) => const AddTripScreen(),
         '/browse_destinations': (context) => const BrowseDestinationsScreen(),
         '/add_expense': (context) => const AddExpenseScreen(),
-      }
+      },
     );
   }
 }

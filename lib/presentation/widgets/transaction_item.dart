@@ -92,11 +92,7 @@ class TransactionItem extends StatelessWidget {
               color: _iconBgColor,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              _iconData,
-              color: _iconColor,
-              size: 22,
-            ),
+            child: Icon(_iconData, color: _iconColor, size: 22),
           ),
           const SizedBox(width: 14),
           // Title and date

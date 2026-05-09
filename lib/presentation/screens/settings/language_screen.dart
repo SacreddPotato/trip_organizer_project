@@ -16,7 +16,13 @@ class _LanguageScreenState extends State<LanguageScreen> {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBg,
       appBar: AppBar(
-        title: const Text('Language', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Language',
+          style: TextStyle(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
@@ -40,10 +46,22 @@ class _LanguageScreenState extends State<LanguageScreen> {
       decoration: BoxDecoration(
         color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: RadioListTile<String>(
-        title: Text(language, style: const TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+        title: Text(
+          language,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
         value: language,
         groupValue: selectedLanguage,
         onChanged: (String? value) {
