@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Trip {
   final String id;
   final String destination;
@@ -20,19 +22,23 @@ class Trip {
       id: json['id'] as String,
       destination: json['destination'] as String,
       title: json['title'] as String,
-      startDate: DateTime.parse(json['startDate'] as String),
-      endDate: DateTime.parse(json['endDate'] as String),
+      startDate: _toDateTime(json['startDate']),
+      endDate: _toDateTime(json['endDate']),
       budget: (json['budget'] as num).toDouble(),
     );
   }
 
-  Map<String, dynamic> toJson() {
+  static DateTime _toDateTime(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    return DateTime.parse(value as String);
+  }
+
+  Map<String, dynamic> toFirestoreMap() {
     return {
-      'id': id,
       'destination': destination,
       'title': title,
-      'startDate': startDate.toIso8601String(),
-      'endDate': endDate.toIso8601String(),
+      'startDate': Timestamp.fromDate(startDate),
+      'endDate': Timestamp.fromDate(endDate),
       'budget': budget,
     };
   }

@@ -37,9 +37,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final avatarUrl = _avatarController.text.isEmpty
-        ? 'https://i.pravatar.cc/150?img=32'
-        : _avatarController.text;
+    final avatarUrl = _avatarController.text.trim();
 
     return Scaffold(
       backgroundColor: context.appColors.scaffoldBg,
@@ -63,14 +61,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             Center(
               child: Stack(
                 children: [
-                  ClipOval(
-                    child: Image.network(
-                      avatarUrl,
-                      width: 120,
-                      height: 120,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+                  avatarUrl.isEmpty
+                      ? CircleAvatar(
+                          radius: 60,
+                          backgroundColor: context.appColors.iconBgBlue,
+                          child: Text(
+                            _nameController.text.isNotEmpty ? _nameController.text[0].toUpperCase() : '?',
+                            style: TextStyle(fontSize: 48, color: context.appColors.primary),
+                          ),
+                        )
+                      : ClipOval(
+                          child: Image.network(
+                            avatarUrl,
+                            width: 120,
+                            height: 120,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) => CircleAvatar(
+                              radius: 60,
+                              backgroundColor: context.appColors.iconBgBlue,
+                              child: Text(
+                                _nameController.text.isNotEmpty ? _nameController.text[0].toUpperCase() : '?',
+                                style: TextStyle(fontSize: 48, color: context.appColors.primary),
+                              ),
+                            ),
+                          ),
+                        ),
                   Positioned(
                     bottom: 0,
                     right: 0,

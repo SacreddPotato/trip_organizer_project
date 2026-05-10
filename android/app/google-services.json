@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "873299453483",
+    "project_id": "trip-organizer-e7056",
+    "storage_bucket": "trip-organizer-e7056.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:873299453483:android:0ead77c16f5795eb7d6c6e",
+        "android_client_info": {
+          "package_name": "com.example.trip_organizer_project"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBofxMn5g_FO_pSeGroNjztNW20TvXv6cI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

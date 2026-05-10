@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 enum TransactionCategory { personal, travel, other }
 
 enum ExpenseType { dining, transit, shopping, activities, transport }
@@ -29,20 +31,24 @@ class Transaction {
       tripId: json['tripId'] as String,
       title: json['title'] as String,
       amount: (json['amount'] as num).toDouble(),
-      date: DateTime.parse(json['date'] as String),
+      date: _toDateTime(json['date']),
       expenseType: ExpenseType.values.byName(json['expenseType'] as String),
       category: TransactionCategory.values.byName(json['category'] as String),
       iconAsset: json['iconAsset'] as String,
     );
   }
 
-  Map<String, dynamic> toJson() {
+  static DateTime _toDateTime(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    return DateTime.parse(value as String);
+  }
+
+  Map<String, dynamic> toFirestoreMap() {
     return {
-      'id': id,
       'tripId': tripId,
       'title': title,
       'amount': amount,
-      'date': date.toIso8601String(),
+      'date': Timestamp.fromDate(date),
       'expenseType': expenseType.name,
       'category': category.name,
       'iconAsset': iconAsset,

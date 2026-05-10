@@ -13,6 +13,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
@@ -20,6 +21,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
@@ -27,11 +29,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
+    final fullName = _fullNameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
     final confirm = _confirmController.text;
 
-    if (email.isEmpty || password.isEmpty) {
+    if (fullName.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields.')),
       );
@@ -47,7 +50,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _loading = true);
     final auth = context.read<AuthProvider>();
-    await auth.register(email: email, password: password);
+    await auth.register(email: email, password: password, fullName: fullName);
     if (!mounted) return;
     setState(() => _loading = false);
 
@@ -55,6 +58,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(auth.error!)),
       );
+    } else {
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 
@@ -86,6 +91,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
               const SizedBox(height: 48),
+              LabeledTextField(
+                label: 'Full Name',
+                hint: 'John Doe',
+                icon: Icons.person_outline,
+                controller: _fullNameController,
+              ),
+              const SizedBox(height: 20),
               LabeledTextField(
                 label: 'Email',
                 hint: 'you@example.com',
