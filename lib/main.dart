@@ -24,10 +24,17 @@ class VoyageApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final darkModeEnabled = context
+        .watch<AppStore>()
+        .preferences
+        .darkModeEnabled;
+
     return MaterialApp(
       title: 'Voyage',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: darkModeEnabled ? ThemeMode.dark : ThemeMode.light,
       routes: {
         '/': (context) => const HomeScreen(),
         '/budget': (context) => const BudgetScreen(),

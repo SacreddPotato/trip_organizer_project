@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trip_organizer_project/core/theme/app_theme_colors.dart';
 
 class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   const MyAppBar({super.key});
@@ -9,12 +10,15 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: Icon(Icons.explore),
+      leading: Icon(Icons.explore, color: context.appColors.primary),
       title: Text(
         'Voyage',
-        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: context.appColors.textPrimary,
+        ),
       ),
-      actions: [IconButton(icon: Icon(Icons.notifications), onPressed: () {})],
       titleSpacing: 0,
     );
   }

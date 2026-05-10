@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trip_organizer_project/data/models/budget_model.dart';
+import 'package:trip_organizer_project/data/models/popular_destination_model.dart';
 import 'package:trip_organizer_project/data/models/transaction_model.dart';
 import 'package:trip_organizer_project/data/models/trip_model.dart';
 import 'package:trip_organizer_project/data/models/user_profile_model.dart';
@@ -15,14 +16,35 @@ class AppStore extends ChangeNotifier {
     email: 'jane.doe@example.com',
     avatarUrl: 'https://i.pravatar.cc/150?img=32',
   );
-  UserPreferences preferences = const UserPreferences(
-    darkModeEnabled: false,
-    pushNotificationsEnabled: true,
-  );
+  UserPreferences preferences = const UserPreferences(darkModeEnabled: false);
   List<Trip> trips = [];
   List<Transaction> transactions = [];
+  final List<PopularDestination> _popularDestinations = const [
+    PopularDestination(
+      title: 'Kyoto, Japan',
+      subtitle: 'Temples, Gardens, Culture',
+      iconName: 'landscape',
+    ),
+    PopularDestination(
+      title: 'Santorini, Greece',
+      subtitle: 'Beaches, Sunsets, Food',
+      iconName: 'beach',
+    ),
+    PopularDestination(
+      title: 'Rome, Italy',
+      subtitle: 'History, Art, Architecture',
+      iconName: 'history',
+    ),
+    PopularDestination(
+      title: 'Bali, Indonesia',
+      subtitle: 'Nature, Relaxation, Temples',
+      iconName: 'nature',
+    ),
+  ];
   String? activeTripId;
   bool isLoaded = false;
+
+  List<PopularDestination> get popularDestinations => _popularDestinations;
 
   Trip? get activeTrip {
     if (trips.isEmpty) return null;
@@ -113,14 +135,9 @@ class AppStore extends ChangeNotifier {
     await _save();
   }
 
-  Future<void> updatePreferences({
-    bool? darkModeEnabled,
-    bool? pushNotificationsEnabled,
-  }) async {
+  Future<void> updatePreferences({bool? darkModeEnabled}) async {
     preferences = UserPreferences(
       darkModeEnabled: darkModeEnabled ?? preferences.darkModeEnabled,
-      pushNotificationsEnabled:
-          pushNotificationsEnabled ?? preferences.pushNotificationsEnabled,
     );
     await _save();
   }

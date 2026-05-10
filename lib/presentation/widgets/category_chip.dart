@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trip_organizer_project/core/constants/app_colors.dart';
+import 'package:trip_organizer_project/core/theme/app_theme_colors.dart';
 
 class CategoryChip extends StatelessWidget {
   final String label;
@@ -23,15 +23,19 @@ class CategoryChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         margin: const EdgeInsets.only(right: 10),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.cardBg,
+          color: isSelected
+              ? context.appColors.primary
+              : context.appColors.cardBg,
           borderRadius: BorderRadius.circular(24),
           border: isSelected
               ? null
-              : Border.all(color: AppColors.textLight.withOpacity(0.5)),
+              : Border.all(
+                  color: context.appColors.textLight.withValues(alpha: 0.5),
+                ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.primary.withOpacity(0.25),
+                    color: context.appColors.primary.withValues(alpha: 0.25),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
@@ -45,7 +49,9 @@ class CategoryChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 16,
-                color: isSelected ? Colors.white : AppColors.textPrimary,
+                color: isSelected
+                    ? Colors.white
+                    : context.appColors.textPrimary,
               ),
               const SizedBox(width: 6),
             ],
@@ -54,7 +60,9 @@ class CategoryChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : AppColors.textPrimary,
+                color: isSelected
+                    ? Colors.white
+                    : context.appColors.textPrimary,
               ),
             ),
           ],

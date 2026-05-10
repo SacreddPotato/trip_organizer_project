@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:trip_organizer_project/core/app_store.dart';
-import 'package:trip_organizer_project/core/constants/app_colors.dart';
+import 'package:trip_organizer_project/core/theme/app_theme_colors.dart';
 import 'package:trip_organizer_project/data/models/transaction_model.dart';
+import 'package:trip_organizer_project/presentation/widgets/labeled_dropdown.dart';
+import 'package:trip_organizer_project/presentation/widgets/labeled_text_field.dart';
+import 'package:trip_organizer_project/presentation/widgets/primary_button.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -29,34 +32,36 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: context.appColors.scaffoldBg,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Add Expense',
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: context.appColors.textPrimary,
             fontWeight: FontWeight.bold,
           ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        iconTheme: IconThemeData(color: context.appColors.textPrimary),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            // Screen title
+            Text(
               'New Expense',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: context.appColors.textPrimary,
               ),
             ),
             const SizedBox(height: 24),
-            _buildTextField(
+            // Expense form fields
+            LabeledTextField(
               label: 'Amount',
               hint: r'$0.00',
               icon: Icons.attach_money,
@@ -64,14 +69,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               controller: _amountController,
             ),
             const SizedBox(height: 16),
-            _buildTextField(
+            LabeledTextField(
               label: 'Description',
               hint: 'e.g. Dinner at Luigi\'s',
               icon: Icons.description_outlined,
               controller: _titleController,
             ),
             const SizedBox(height: 16),
-            _buildDropdown<ExpenseType>(
+            LabeledDropdown<ExpenseType>(
               label: 'Type',
               value: _expenseType,
               values: ExpenseType.values,
@@ -79,7 +84,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               onChanged: (value) => setState(() => _expenseType = value),
             ),
             const SizedBox(height: 16),
-            _buildDropdown<TransactionCategory>(
+            LabeledDropdown<TransactionCategory>(
               label: 'Category',
               value: _category,
               values: TransactionCategory.values,
@@ -87,7 +92,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               onChanged: (value) => setState(() => _category = value),
             ),
             const SizedBox(height: 16),
-            _buildTextField(
+            LabeledTextField(
               label: 'Date',
               hint: _formatDate(_date),
               icon: Icons.calendar_today,
@@ -95,124 +100,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               onTap: _pickDate,
             ),
             const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _isSaving ? null : _saveExpense,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  _isSaving ? 'Saving...' : 'Save Expense',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+            // Save expense action
+            PrimaryButton(
+              label: _isSaving ? 'Saving...' : 'Save Expense',
+              onPressed: _isSaving ? null : _saveExpense,
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField({
-    required String label,
-    required String hint,
-    required IconData icon,
-    bool readOnly = false,
-    bool isNumber = false,
-    TextEditingController? controller,
-    VoidCallback? onTap,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          readOnly: readOnly,
-          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-          onTap: onTap,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(color: AppColors.textLight),
-            prefixIcon: Icon(icon, color: AppColors.primary),
-            filled: true,
-            fillColor: AppColors.cardBg,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 16,
-              horizontal: 16,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDropdown<T>({
-    required String label,
-    required T value,
-    required List<T> values,
-    required String Function(T value) labelFor,
-    required ValueChanged<T> onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<T>(
-          initialValue: value,
-          items: values.map((item) {
-            return DropdownMenuItem<T>(
-              value: item,
-              child: Text(labelFor(item)),
-            );
-          }).toList(),
-          onChanged: (value) {
-            if (value != null) onChanged(value);
-          },
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: AppColors.cardBg,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 16,
-              horizontal: 16,
-            ),
-          ),
-        ),
-      ],
     );
   }
 

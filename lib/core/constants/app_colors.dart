@@ -14,7 +14,6 @@ class AppColors {
   // Budget
   static const Color budgetAmount = Color(0xFF1A3A4A);
   static const Color spentAmount = Color(0xFFE85D4E);
-  static const Color remainingAmount = Color(0xFF6B8A9A);
 
   // Progress bar
   static const Color progressBackground = Color(0xFFF0E6DE);
@@ -32,7 +31,6 @@ class AppColors {
   static const Color iconBgRed = Color(0xFFFFEAE8);
   static const Color iconBgBlue = Color(0xFFE8F4FD);
   static const Color iconBgGray = Color(0xFFF5F5F5);
-  static const Color iconBgOrange = Color(0xFFFFF3E8);
 
   // Text
   static const Color textPrimary = Color(0xFF1A3A4A);

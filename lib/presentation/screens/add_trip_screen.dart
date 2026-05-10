@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:trip_organizer_project/core/app_store.dart';
-import 'package:trip_organizer_project/core/constants/app_colors.dart';
+import 'package:trip_organizer_project/core/theme/app_theme_colors.dart';
+import 'package:trip_organizer_project/presentation/widgets/labeled_text_field.dart';
+import 'package:trip_organizer_project/presentation/widgets/primary_button.dart';
 
 class AddTripScreen extends StatefulWidget {
   const AddTripScreen({super.key});
@@ -29,41 +31,43 @@ class _AddTripScreenState extends State<AddTripScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.scaffoldBg,
+      backgroundColor: context.appColors.scaffoldBg,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Plan a Trip',
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: context.appColors.textPrimary,
             fontWeight: FontWeight.bold,
           ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        iconTheme: IconThemeData(color: context.appColors.textPrimary),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            // Screen title
+            Text(
               'Where to next?',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: context.appColors.textPrimary,
               ),
             ),
             const SizedBox(height: 24),
-            _buildTextField(
+            // Trip form fields
+            LabeledTextField(
               label: 'Destination',
               hint: 'e.g. Paris, France',
               icon: Icons.location_on_outlined,
               controller: _destinationController,
             ),
             const SizedBox(height: 16),
-            _buildTextField(
+            LabeledTextField(
               label: 'Trip Name',
               hint: 'e.g. Summer Vacation',
               icon: Icons.card_travel_outlined,
@@ -73,7 +77,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
             Row(
               children: [
                 Expanded(
-                  child: _buildTextField(
+                  child: LabeledTextField(
                     label: 'Start Date',
                     hint: _formatDate(_startDate),
                     icon: Icons.calendar_today,
@@ -83,7 +87,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: _buildTextField(
+                  child: LabeledTextField(
                     label: 'End Date',
                     hint: _formatDate(_endDate),
                     icon: Icons.calendar_today,
@@ -94,7 +98,7 @@ class _AddTripScreenState extends State<AddTripScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            _buildTextField(
+            LabeledTextField(
               label: 'Budget',
               hint: r'$0.00',
               icon: Icons.attach_money,
@@ -102,77 +106,14 @@ class _AddTripScreenState extends State<AddTripScreen> {
               isNumber: true,
             ),
             const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _isSaving ? null : _saveTrip,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  _isSaving ? 'Creating...' : 'Create Trip',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
+            // Create trip action
+            PrimaryButton(
+              label: _isSaving ? 'Creating...' : 'Create Trip',
+              onPressed: _isSaving ? null : _saveTrip,
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField({
-    required String label,
-    required String hint,
-    required IconData icon,
-    TextEditingController? controller,
-    bool readOnly = false,
-    bool isNumber = false,
-    VoidCallback? onTap,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          readOnly: readOnly,
-          keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-          onTap: onTap,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(color: AppColors.textLight),
-            prefixIcon: Icon(icon, color: AppColors.primary),
-            filled: true,
-            fillColor: AppColors.cardBg,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 16,
-              horizontal: 16,
-            ),
-          ),
-        ),
-      ],
     );
   }
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trip_organizer_project/core/constants/app_colors.dart';
+import 'package:trip_organizer_project/core/theme/app_theme_colors.dart';
 import 'package:trip_organizer_project/data/models/budget_model.dart';
 
 class BudgetCard extends StatelessWidget {
@@ -15,11 +15,11 @@ class BudgetCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        color: context.appColors.cardBg,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -29,12 +29,12 @@ class BudgetCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // TRIP BUDGET label
-          const Text(
+          Text(
             'TRIP BUDGET',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+              color: context.appColors.textSecondary,
               letterSpacing: 1.2,
             ),
           ),
@@ -45,29 +45,29 @@ class BudgetCard extends StatelessWidget {
             children: [
               Text(
                 budget.formattedTotal,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.budgetAmount,
+                  color: context.appColors.budgetAmount,
                 ),
               ),
               const Spacer(),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text(
+                  Text(
                     'Spent',
                     style: TextStyle(
                       fontSize: 10,
-                      color: AppColors.textSecondary,
+                      color: context.appColors.textSecondary,
                     ),
                   ),
                   Text(
                     budget.formattedSpent,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.spentAmount,
+                      color: context.appColors.spentAmount,
                     ),
                   ),
                 ],
@@ -83,7 +83,7 @@ class BudgetCard extends StatelessWidget {
                 Container(
                   height: 8,
                   decoration: BoxDecoration(
-                    color: AppColors.progressBackground,
+                    color: context.appColors.progressBackground,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -92,7 +92,7 @@ class BudgetCard extends StatelessWidget {
                   child: Container(
                     height: 8,
                     decoration: BoxDecoration(
-                      color: AppColors.progressFill,
+                      color: context.appColors.progressFill,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -107,16 +107,16 @@ class BudgetCard extends StatelessWidget {
             children: [
               Text(
                 '${percent.toStringAsFixed(0)}% Consumed',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: context.appColors.textSecondary,
                 ),
               ),
               Text(
                 '${budget.formattedRemaining} Remaining',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: context.appColors.textSecondary,
                 ),
               ),
             ],

@@ -24,24 +24,16 @@ class UserProfile {
 
 class UserPreferences {
   final bool darkModeEnabled;
-  final bool pushNotificationsEnabled;
 
-  const UserPreferences({
-    required this.darkModeEnabled,
-    required this.pushNotificationsEnabled,
-  });
+  const UserPreferences({required this.darkModeEnabled});
 
   factory UserPreferences.fromJson(Map<String, dynamic> json) {
     return UserPreferences(
-      darkModeEnabled: json['darkModeEnabled'] as bool,
-      pushNotificationsEnabled: json['pushNotificationsEnabled'] as bool,
+      darkModeEnabled: json['darkModeEnabled'] as bool? ?? false,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'darkModeEnabled': darkModeEnabled,
-      'pushNotificationsEnabled': pushNotificationsEnabled,
-    };
+    return {'darkModeEnabled': darkModeEnabled};
   }
 }

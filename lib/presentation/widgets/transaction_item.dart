@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trip_organizer_project/core/constants/app_colors.dart';
+import 'package:trip_organizer_project/core/theme/app_theme_colors.dart';
 import 'package:trip_organizer_project/data/models/transaction_model.dart';
 
 class TransactionItem extends StatelessWidget {
@@ -7,47 +7,47 @@ class TransactionItem extends StatelessWidget {
 
   const TransactionItem({super.key, required this.transaction});
 
-  Color get _iconBgColor {
+  Color _iconBgColor(BuildContext context) {
     switch (transaction.category) {
       case TransactionCategory.personal:
-        return AppColors.iconBgRed;
+        return context.appColors.iconBgRed;
       case TransactionCategory.travel:
-        return AppColors.iconBgBlue;
+        return context.appColors.iconBgBlue;
       case TransactionCategory.other:
-        return AppColors.iconBgGray;
+        return context.appColors.iconBgGray;
     }
   }
 
-  Color get _iconColor {
+  Color _iconColor(BuildContext context) {
     switch (transaction.category) {
       case TransactionCategory.personal:
-        return AppColors.personalTagText;
+        return context.appColors.personalTagText;
       case TransactionCategory.travel:
-        return AppColors.travelTagText;
+        return context.appColors.travelTagText;
       case TransactionCategory.other:
-        return AppColors.otherTagText;
+        return context.appColors.otherTagText;
     }
   }
 
-  Color get _tagBgColor {
+  Color _tagBgColor(BuildContext context) {
     switch (transaction.category) {
       case TransactionCategory.personal:
-        return AppColors.personalTagBg;
+        return context.appColors.personalTagBg;
       case TransactionCategory.travel:
-        return AppColors.travelTagBg;
+        return context.appColors.travelTagBg;
       case TransactionCategory.other:
-        return AppColors.otherTagBg;
+        return context.appColors.otherTagBg;
     }
   }
 
-  Color get _tagTextColor {
+  Color _tagTextColor(BuildContext context) {
     switch (transaction.category) {
       case TransactionCategory.personal:
-        return AppColors.personalTagText;
+        return context.appColors.personalTagText;
       case TransactionCategory.travel:
-        return AppColors.travelTagText;
+        return context.appColors.travelTagText;
       case TransactionCategory.other:
-        return AppColors.otherTagText;
+        return context.appColors.otherTagText;
     }
   }
 
@@ -72,11 +72,11 @@ class TransactionItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        color: context.appColors.cardBg,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -89,10 +89,10 @@ class TransactionItem extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: _iconBgColor,
+              color: _iconBgColor(context),
               shape: BoxShape.circle,
             ),
-            child: Icon(_iconData, color: _iconColor, size: 22),
+            child: Icon(_iconData, color: _iconColor(context), size: 22),
           ),
           const SizedBox(width: 14),
           // Title and date
@@ -102,18 +102,18 @@ class TransactionItem extends StatelessWidget {
               children: [
                 Text(
                   transaction.title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: context.appColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   transaction.dateLabel,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: context.appColors.textSecondary,
                   ),
                 ),
               ],
@@ -125,17 +125,17 @@ class TransactionItem extends StatelessWidget {
             children: [
               Text(
                 transaction.formattedAmount,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: context.appColors.textPrimary,
                 ),
               ),
               const SizedBox(height: 6),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: _tagBgColor,
+                  color: _tagBgColor(context),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -143,7 +143,7 @@ class TransactionItem extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.w700,
-                    color: _tagTextColor,
+                    color: _tagTextColor(context),
                     letterSpacing: 0.5,
                   ),
                 ),
