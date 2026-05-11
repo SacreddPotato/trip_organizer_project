@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trip_organizer_project/core/constants/app_colors.dart';
 import 'package:trip_organizer_project/data/models/transaction_model.dart';
+import 'package:trip_organizer_project/enums/trip_enums.dart';
 
 class TransactionItem extends StatelessWidget {
   final Transaction transaction;
@@ -9,44 +10,44 @@ class TransactionItem extends StatelessWidget {
 
   Color get _iconBgColor {
     switch (transaction.category) {
-      case TransactionCategory.personal:
+      case ExpenseCategory.personal:
         return AppColors.iconBgRed;
-      case TransactionCategory.travel:
+      case ExpenseCategory.travel:
         return AppColors.iconBgBlue;
-      case TransactionCategory.other:
+      case ExpenseCategory.other:
         return AppColors.iconBgGray;
     }
   }
 
   Color get _iconColor {
     switch (transaction.category) {
-      case TransactionCategory.personal:
+      case ExpenseCategory.personal:
         return AppColors.personalTagText;
-      case TransactionCategory.travel:
+      case ExpenseCategory.travel:
         return AppColors.travelTagText;
-      case TransactionCategory.other:
+      case ExpenseCategory.other:
         return AppColors.otherTagText;
     }
   }
 
   Color get _tagBgColor {
     switch (transaction.category) {
-      case TransactionCategory.personal:
+      case ExpenseCategory.personal:
         return AppColors.personalTagBg;
-      case TransactionCategory.travel:
+      case ExpenseCategory.travel:
         return AppColors.travelTagBg;
-      case TransactionCategory.other:
+      case ExpenseCategory.other:
         return AppColors.otherTagBg;
     }
   }
 
   Color get _tagTextColor {
     switch (transaction.category) {
-      case TransactionCategory.personal:
+      case ExpenseCategory.personal:
         return AppColors.personalTagText;
-      case TransactionCategory.travel:
+      case ExpenseCategory.travel:
         return AppColors.travelTagText;
-      case TransactionCategory.other:
+      case ExpenseCategory.other:
         return AppColors.otherTagText;
     }
   }
@@ -63,6 +64,12 @@ class TransactionItem extends StatelessWidget {
         return Icons.museum;
       case ExpenseType.transport:
         return Icons.directions_bus;
+      case ExpenseType.hotel:
+        return Icons.hotel;
+      case ExpenseType.flight:
+        return Icons.flight;
+      case ExpenseType.other:
+        return Icons.receipt_long;
     }
   }
 
@@ -76,7 +83,7 @@ class TransactionItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

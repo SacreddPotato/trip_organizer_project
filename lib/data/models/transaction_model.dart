@@ -1,15 +1,16 @@
-enum TransactionCategory { personal, travel, other }
+import 'package:trip_organizer_project/enums/trip_enums.dart';
 
-enum ExpenseType { dining, transit, shopping, activities, transport }
-
+// Transaction is the UI-layer model used by BudgetScreen and TransactionItem.
+// It maps to the Expense domain model but uses simpler fields for display purposes.
+// ExpenseCategory and ExpenseType come from trip_enums.dart (no local duplicates).
 class Transaction {
   final String id;
   final String title;
   final double amount;
   final DateTime date;
   final ExpenseType expenseType;
-  final TransactionCategory category;
-  final String iconAsset; // placeholder for icon identifier
+  final ExpenseCategory category;
+  final String iconAsset;
 
   const Transaction({
     required this.id,
@@ -25,11 +26,11 @@ class Transaction {
 
   String get categoryLabel {
     switch (category) {
-      case TransactionCategory.personal:
+      case ExpenseCategory.personal:
         return 'PERSONAL';
-      case TransactionCategory.travel:
+      case ExpenseCategory.travel:
         return 'TRAVEL';
-      case TransactionCategory.other:
+      case ExpenseCategory.other:
         return 'OTHER';
     }
   }
@@ -46,6 +47,12 @@ class Transaction {
         return 'Activities';
       case ExpenseType.transport:
         return 'Transport';
+      case ExpenseType.hotel:
+        return 'Hotel';
+      case ExpenseType.flight:
+        return 'Flight';
+      case ExpenseType.other:
+        return 'Other';
     }
   }
 

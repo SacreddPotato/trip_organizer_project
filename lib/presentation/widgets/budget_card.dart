@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trip_organizer_project/core/constants/app_colors.dart';
 import 'package:trip_organizer_project/data/models/budget_model.dart';
+import 'package:trip_organizer_project/data/models/money_model.dart';
 
 class BudgetCard extends StatelessWidget {
   final Budget budget;
@@ -9,7 +10,7 @@ class BudgetCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final percent = budget.percentConsumed.clamp(0, 100);
+    final percent = budget.percentConsumed().clamp(0, 100);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -19,7 +20,7 @@ class BudgetCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -44,7 +45,7 @@ class BudgetCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                budget.formattedTotal,
+                '\$${budget.totalAmount.amount.toStringAsFixed(2)}',
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -63,7 +64,7 @@ class BudgetCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    budget.formattedSpent,
+                    '\$${budget.spentAmount.amount.toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -113,7 +114,7 @@ class BudgetCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '${budget.formattedRemaining} Remaining',
+                '\$${budget.remainingAmount().amount.toStringAsFixed(2)} Remaining',
                 style: const TextStyle(
                   fontSize: 12,
                   color: AppColors.textSecondary,

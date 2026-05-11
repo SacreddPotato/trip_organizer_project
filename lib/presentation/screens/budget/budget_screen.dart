@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:trip_organizer_project/core/constants/app_colors.dart';
 import 'package:trip_organizer_project/data/models/budget_model.dart';
+import 'package:trip_organizer_project/data/models/money_model.dart';
 import 'package:trip_organizer_project/data/models/transaction_model.dart';
+import 'package:trip_organizer_project/enums/trip_enums.dart';
 import 'package:trip_organizer_project/presentation/widgets/bottom_nav_bar.dart';
 import 'package:trip_organizer_project/presentation/widgets/budget_card.dart';
 import 'package:trip_organizer_project/presentation/widgets/category_chip.dart';
@@ -17,9 +19,11 @@ class BudgetScreen extends StatefulWidget {
 class _BudgetScreenState extends State<BudgetScreen> {
   String _selectedCategory = 'All';
 
-  final Budget _budget = const Budget(
-    totalBudget: 4250.00,
-    spent: 2840.50,
+  final Budget _budget = Budget(
+    id: 'budget_1',
+    tripId: 'trip_1',
+    totalAmount: Money(amount: 4250.00, currencyCode: 'USD'),
+    spentAmount: Money(amount: 2840.50, currencyCode: 'USD'),
   );
 
   late final List<Transaction> _transactions;
@@ -35,7 +39,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
         amount: 42.80,
         date: DateTime(now.year, now.month, now.day, 14, 30),
         expenseType: ExpenseType.dining,
-        category: TransactionCategory.personal,
+        category: ExpenseCategory.personal,
         iconAsset: 'dining',
       ),
       Transaction(
@@ -44,7 +48,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
         amount: 156.00,
         date: now.subtract(const Duration(days: 1)),
         expenseType: ExpenseType.transport,
-        category: TransactionCategory.travel,
+        category: ExpenseCategory.travel,
         iconAsset: 'transit',
       ),
       Transaction(
@@ -53,7 +57,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
         amount: 89.20,
         date: DateTime(now.year, 10, 24),
         expenseType: ExpenseType.shopping,
-        category: TransactionCategory.other,
+        category: ExpenseCategory.other,
         iconAsset: 'shopping',
       ),
       Transaction(
@@ -62,7 +66,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
         amount: 6.50,
         date: DateTime(now.year, 10, 23),
         expenseType: ExpenseType.dining,
-        category: TransactionCategory.personal,
+        category: ExpenseCategory.personal,
         iconAsset: 'dining',
       ),
       Transaction(
@@ -71,7 +75,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
         amount: 35.00,
         date: DateTime(now.year, 10, 23),
         expenseType: ExpenseType.activities,
-        category: TransactionCategory.travel,
+        category: ExpenseCategory.travel,
         iconAsset: 'activities',
       ),
     ];
@@ -97,7 +101,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
   }
 
   void _onAddExpense() {
-    // TODO: Navigate to add expense screen
+    Navigator.pushNamed(context, '/add_expense');
   }
 
   @override
