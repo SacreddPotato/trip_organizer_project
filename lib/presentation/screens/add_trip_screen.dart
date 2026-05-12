@@ -6,19 +6,29 @@ import 'package:trip_organizer_project/presentation/widgets/labeled_text_field.d
 import 'package:trip_organizer_project/presentation/widgets/primary_button.dart';
 
 class AddTripScreen extends StatefulWidget {
-  const AddTripScreen({super.key});
+  final String? initialDestination;
+
+  const AddTripScreen({super.key, this.initialDestination});
 
   @override
   State<AddTripScreen> createState() => _AddTripScreenState();
 }
 
 class _AddTripScreenState extends State<AddTripScreen> {
-  final _destinationController = TextEditingController();
+  late final TextEditingController _destinationController;
   final _tripNameController = TextEditingController();
   final _budgetController = TextEditingController();
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(days: 7));
   bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _destinationController = TextEditingController(
+      text: widget.initialDestination ?? '',
+    );
+  }
 
   @override
   void dispose() {

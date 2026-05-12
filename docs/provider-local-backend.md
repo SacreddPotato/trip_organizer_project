@@ -1,97 +1,195 @@
-# Provider Local Backend Implementation
+# Provider And Firebase Backend Implementation
 
 ## What Changed
 
-The app now uses a minimal local backend built around two packages:
+The app now uses Provider for UI state and Firebase for authentication and persistence.
 
-- `provider`: exposes app state to the widget tree and rebuilds screens when state changes.
-- `shared_preferences`: saves the app state locally so trips, expenses, profile data, and preferences survive app restarts.
+- `provider` exposes auth and app state to the widget tree.
+- `firebase_core` initializes Firebase before the app starts.
+- `firebase_auth` handles sign in, registration, sign out, and auth state changes.
+- `cloud_firestore` stores user profiles, preferences, trips, and transactions.
 
-The previous service-heavy idea was replaced with one central store:
+Provider still keeps the screens simple: widgets read state with `watch`, perform actions with `read`, and rebuild when a provider calls `notifyListeners()`. Firebase is the durable backend behind those provider methods.
+
+## Current Architecture
+
+The main runtime flow is:
 
 ```text
-lib/core/app_store.dart
+UI screens
+  -> Provider
+  -> AuthProvider / AppStore
+  -> repository interfaces
+  -> Firebase Auth / Cloud Firestore
 ```
 
-The implementation intentionally keeps the data model small. It only supports the frontend flows that currently exist:
+The important app-level classes are:
 
-- create trips
-- show trips on Home
-- add expenses
-- calculate active trip budget totals
-- edit profile
-- persist dark mode and push notification preferences
+- `AuthProvider`: listens to Firebase Auth state and exposes `unknown`, `authenticated`, or `unauthenticated`.
+- `AppStore`: holds the loaded user profile, preferences, trips, active trip, and active trip transactions.
+- `FirebaseAuthRepository`: wraps Firebase Auth and creates the initial Firestore user document during registration.
+- `FirebaseUserRepository`: reads and writes `users/{uid}`.
+- `FirebaseTripRepository`: reads and writes trips and transactions under each user.
 
-No API layer, repository layer, Firebase, database package, itinerary backend, reservations, attachments, reminders, members, or notification delivery system was added.
+`AppStore` is still the main UI-facing app state object, but it no longer owns persistence directly. It delegates persistence to repositories.
 
-## Dependencies Added
+## Dependencies
 
-`pubspec.yaml` now includes:
+`pubspec.yaml` currently includes:
 
 ```yaml
 provider: ^6.1.5
-shared_preferences: ^2.5.3
+firebase_core: ^3.13.1
+firebase_auth: ^5.5.2
+cloud_firestore: ^5.6.7
 ```
 
-Provider handles state access and UI rebuilds. Shared Preferences handles local persistence.
+Provider handles state access and UI rebuilds. Firebase Auth and Firestore handle data that must survive app restarts and be tied to the signed-in user.
 
-Provider alone would not save data after the app closes. It only keeps state alive while the app process is running.
+## Startup Flow
 
-## New And Updated Files
+The app initializes Firebase before building the widget tree:
 
-### New Files
+```dart
+WidgetsFlutterBinding.ensureInitialized();
+await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+```
 
-- `lib/core/app_store.dart`
-  The single app-wide store.
-- `lib/data/models/trip_model.dart`
-  Minimal `Trip` model.
-- `lib/data/models/user_profile_model.dart`
-  Minimal `UserProfile` and `UserPreferences` models.
-- `test/app_store_test.dart`
-  Unit tests for the store.
+Then `main.dart` installs providers with `MultiProvider`:
 
-### Updated Files
+```dart
+MultiProvider(
+  providers: [
+    ChangeNotifierProvider<AuthProvider>(
+      create: (_) => AuthProvider(authRepository: FirebaseAuthRepository()),
+    ),
+    ChangeNotifierProxyProvider<AuthProvider, AppStore>(
+      create: (_) => AppStore(
+        tripRepository: FirebaseTripRepository(),
+        userRepository: FirebaseUserRepository(),
+      ),
+      update: (_, auth, store) {
+        if (auth.status == AuthStatus.authenticated && !store!.isLoaded) {
+          store.load(
+            auth.uid!,
+            fallbackName: auth.displayName,
+            fallbackEmail: auth.email,
+          );
+        } else if (auth.status == AuthStatus.unauthenticated &&
+            store!.isLoaded) {
+          store.reset();
+        }
+        return store!;
+      },
+    ),
+  ],
+  child: const VoyageApp(),
+)
+```
 
-- `lib/main.dart`
-  Wraps the app with `ChangeNotifierProvider`.
-- `lib/data/models/transaction_model.dart`
-  Adds `tripId`, `fromJson`, and `toJson`.
-- `lib/data/models/budget_model.dart`
-  Guards against division by zero in `percentConsumed`.
-- Current screens now read/write state through Provider:
-  `HomeScreen`, `AddTripScreen`, `BudgetScreen`, `AddExpenseScreen`, `ProfileScreen`, `EditProfileScreen`, `SettingsScreen`, and `NotificationsScreen`.
+The proxy provider is the bridge between auth and app data:
 
-## The Central Store
+- when Firebase Auth reports an authenticated user, `AppStore.load()` fetches that user's Firestore data
+- when the user signs out, `AppStore.reset()` clears user-specific state from memory
 
-`AppStore` is the local backend. It extends Flutter's `ChangeNotifier`, which means it can tell Provider when something changed.
+## Auth Gate
+
+`AuthGate` decides which screen to show:
+
+```dart
+final authStatus = context.watch<AuthProvider>().status;
+final store = context.watch<AppStore>();
+
+if (authStatus == AuthStatus.unknown ||
+    (authStatus == AuthStatus.authenticated && !store.isLoaded)) {
+  return const SplashScreen();
+}
+
+if (authStatus == AuthStatus.unauthenticated) {
+  return const LoginScreen();
+}
+
+return const HomeScreen();
+```
+
+This prevents the app from showing Home until Firebase Auth has resolved and the authenticated user's Firestore data has loaded.
+
+## Firestore Data Shape
+
+The current Firestore structure is:
+
+```text
+users/{uid}
+  name: string
+  email: string
+  avatarUrl: string
+  darkModeEnabled: boolean
+  activeTripId: string | null
+
+users/{uid}/trips/{tripId}
+  destination: string
+  title: string
+  startDate: Timestamp
+  endDate: Timestamp
+  budget: number
+
+users/{uid}/trips/{tripId}/transactions/{transactionId}
+  tripId: string
+  title: string
+  amount: number
+  date: Timestamp
+  expenseType: string
+  category: string
+  iconAsset: string
+```
+
+User-level settings live directly on the user document. Trips are a subcollection of that user. Transactions are a subcollection of the trip they belong to.
+
+## AppStore State
+
+`AppStore` extends `ChangeNotifier`, so it can tell Provider when screens should rebuild.
 
 Current state fields:
 
 ```dart
-class AppStore extends ChangeNotifier {
-  static const _storageKey = 'voyage_minimal_state_v1';
-
-  UserProfile profile = const UserProfile(
-    name: 'Jane Doe',
-    email: 'jane.doe@example.com',
-    avatarUrl: 'https://i.pravatar.cc/150?img=32',
-  );
-  UserPreferences preferences = const UserPreferences(
-    darkModeEnabled: false,
-    pushNotificationsEnabled: true,
-  );
-  List<Trip> trips = [];
-  List<Transaction> transactions = [];
-  String? activeTripId;
-  bool isLoaded = false;
-}
+String? _currentUid;
+UserProfile profile = const UserProfile(name: '', email: '', avatarUrl: '');
+UserPreferences preferences = const UserPreferences(darkModeEnabled: false);
+List<Trip> trips = [];
+List<Transaction> transactions = [];
+String? activeTripId;
+bool isLoaded = false;
+String? errorMessage;
 ```
 
-This replaces separate service classes. For the current app size, one store is easier to read and maintain.
+The store keeps only the data the current UI needs. It also exposes hardcoded popular destinations for the browse screen:
+
+```dart
+List<PopularDestination> get popularDestinations => _popularDestinations;
+```
+
+Those popular destination cards are not Firestore-backed right now.
+
+## Loading User Data
+
+`AppStore.load(uid, fallbackName, fallbackEmail)` is called after authentication.
+
+The load sequence is:
+
+1. Store the current `uid`.
+2. Set `isLoaded` to `false` and notify listeners.
+3. Fetch `users/{uid}` through `FirebaseUserRepository.fetchUserDocument()`.
+4. If the user document exists, load `UserProfile`, `UserPreferences`, and `activeTripId`.
+5. If the user document does not exist but Firebase Auth has fallback name or email values, create a basic profile document.
+6. Fetch `users/{uid}/trips`.
+7. If `activeTripId` exists, fetch that trip's transactions.
+8. Set `isLoaded` to `true` and notify listeners.
+
+The user sees `SplashScreen` while this is happening.
 
 ## Derived State
 
-The store does not persist budget summaries separately. It calculates them from trips and transactions.
+The store does not save budget summaries. It calculates them from the active trip and its loaded transactions.
 
 ```dart
 Trip? get activeTrip {
@@ -103,7 +201,7 @@ Trip? get activeTrip {
 }
 ```
 
-`activeTrip` returns the selected trip. If no selected trip exists, it falls back to the latest trip.
+`activeTrip` returns the selected trip. If the saved active trip id does not match a loaded trip, it falls back to the latest trip.
 
 ```dart
 List<Transaction> get activeTripTransactions {
@@ -116,7 +214,7 @@ List<Transaction> get activeTripTransactions {
 }
 ```
 
-`activeTripTransactions` filters all expenses down to the active trip and sorts newest first.
+`activeTripTransactions` filters transactions to the active trip and sorts newest first.
 
 ```dart
 Budget get activeBudget {
@@ -129,80 +227,91 @@ Budget get activeBudget {
 }
 ```
 
-`activeBudget` calculates spent and remaining values from transactions. This prevents duplicated budget state from getting out of sync.
+`activeBudget` calculates the current budget totals from the active trip and transactions.
 
-## Persistence
+## Write Flows
 
-The whole app state is saved as one JSON object in Shared Preferences.
+### Registration
 
-```dart
-Future<void> load() async {
-  final prefs = await SharedPreferences.getInstance();
-  final raw = prefs.getString(_storageKey);
-  if (raw != null) {
-    _readJson(jsonDecode(raw) as Map<String, dynamic>);
-  }
-  isLoaded = true;
-  notifyListeners();
-}
-```
-
-`load()` reads saved JSON on startup. If no JSON exists yet, the default profile/preferences and empty lists remain in memory.
+`FirebaseAuthRepository.register()` creates the Firebase Auth user, updates the Firebase Auth display name, then creates `users/{uid}`:
 
 ```dart
-Future<void> _save() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setString(_storageKey, jsonEncode(_toJson()));
-  notifyListeners();
-}
+await _db.collection('users').doc(user.uid).set({
+  'name': fullName,
+  'email': email,
+  'avatarUrl': '',
+});
 ```
 
-`_save()` writes the latest state and calls `notifyListeners()`.
+After Firebase Auth emits the authenticated user, `AuthProvider` notifies listeners and `AppStore.load()` loads the user's Firestore data.
 
-That call is what makes Provider rebuild screens that are watching the store.
+### Sign In
 
-The persisted data shape is compact:
+`FirebaseAuthRepository.signIn()` signs in with Firebase Auth:
 
 ```dart
-Map<String, dynamic> _toJson() {
-  return {
-    'profile': profile.toJson(),
-    'preferences': preferences.toJson(),
-    'trips': trips.map((trip) => trip.toJson()).toList(),
-    'transactions': transactions
-        .map((transaction) => transaction.toJson())
-        .toList(),
-    'activeTripId': activeTripId,
-  };
-}
+await _auth.signInWithEmailAndPassword(
+  email: email,
+  password: password,
+);
 ```
 
-## How Provider Is Set Up
+The auth state listener updates `AuthProvider.status`, and the proxy provider loads user data into `AppStore`.
 
-Provider is installed at the root of the app in `main.dart`:
+### Create Trip
+
+`AppStore.createTrip()` builds a `Trip`, writes it to `users/{uid}/trips`, stores the generated Firestore document id, makes it active, clears the transaction list, and saves `activeTripId` on the user document.
 
 ```dart
-void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => AppStore()..load(),
-      child: const VoyageApp(),
-    ),
-  );
-}
+final docId = await _tripRepository.createTrip(
+  uid,
+  tempTrip.toFirestoreMap(),
+);
+
+activeTripId = trip.id;
+transactions = [];
+await _userRepository.saveActiveTripId(uid, trip.id);
 ```
 
-This does three important things:
+The UI is updated with the new in-memory trip immediately after the write succeeds.
 
-1. Creates one `AppStore`.
-2. Calls `load()` immediately so saved local data is restored.
-3. Makes the store available to every screen under `VoyageApp`.
+### Add Expense
 
-Because the provider wraps the whole app, screens do not need to manually pass state through constructors.
+`AppStore.addExpense()` requires a current user and an active trip. It writes the transaction under:
+
+```text
+users/{uid}/trips/{tripId}/transactions/{transactionId}
+```
+
+Then it appends the created transaction to `transactions` and notifies listeners.
+
+### Update Profile
+
+`AppStore.updateProfile()` writes the new profile fields to `users/{uid}` with Firestore merge semantics:
+
+```dart
+await _userRepository.saveProfile(uid, {
+  'name': name,
+  'email': email,
+  'avatarUrl': avatarUrl,
+});
+```
+
+After the write succeeds, `profile` is updated in memory.
+
+### Update Preferences
+
+`AppStore.updatePreferences()` writes preference fields to `users/{uid}`:
+
+```dart
+await _userRepository.savePreferences(uid, updated.toJson());
+```
+
+The current model stores `darkModeEnabled`. `VoyageApp` watches that value and switches `ThemeMode`.
 
 ## How Screens Read State
 
-Screens that display store data use:
+Screens that display provider state use:
 
 ```dart
 context.watch<AppStore>()
@@ -214,27 +323,15 @@ context.watch<AppStore>()
 - subscribe this widget to changes
 - rebuild this widget when `notifyListeners()` is called
 
-Example from `HomeScreen`:
+Example from Home:
 
 ```dart
 final store = context.watch<AppStore>();
-
-return Scaffold(
-  body: store.trips.isEmpty
-      ? const _EmptyTripsView()
-      : ListView(
-          children: [
-            ...store.trips.map((trip) {
-              return Text(trip.title);
-            }),
-          ],
-        ),
-);
 ```
 
-This is why Home automatically changes from the empty state to the trip list after a trip is created.
+Home uses `store.trips` to render the trip list.
 
-Example from `BudgetScreen`:
+Example from Budget:
 
 ```dart
 final store = context.watch<AppStore>();
@@ -247,23 +344,21 @@ Budget reads derived state from the store:
 - `store.activeBudget`
 - `store.activeTripTransactions`
 
-When an expense is added, `_save()` calls `notifyListeners()`, and `BudgetScreen` rebuilds with the new transaction and recalculated budget.
-
-Example from `ProfileScreen`:
+Example from Profile:
 
 ```dart
 final profile = context.watch<AppStore>().profile;
 ```
 
-The profile screen now displays stored profile data instead of hardcoded text.
+Profile rebuilds when the loaded or edited profile changes.
 
-Example from `SettingsScreen`:
+Example from Settings:
 
 ```dart
 final preferences = context.watch<AppStore>().preferences;
 ```
 
-The settings screen reads persisted preferences.
+Settings rebuilds when preferences change.
 
 ## How Screens Write State
 
@@ -276,10 +371,10 @@ context.read<AppStore>()
 `read` means:
 
 - get the current store
-- do not subscribe this widget to changes from that call
+- do not subscribe this particular call to changes
 - useful inside button handlers, form submits, and callbacks
 
-Example from `AddTripScreen`:
+Example from Add Trip:
 
 ```dart
 await context.read<AppStore>().createTrip(
@@ -291,33 +386,7 @@ await context.read<AppStore>().createTrip(
 );
 ```
 
-This calls the store method:
-
-```dart
-Future<void> createTrip({
-  required String destination,
-  required String title,
-  required DateTime startDate,
-  required DateTime endDate,
-  required double budget,
-}) async {
-  final trip = Trip(
-    id: _createId('trip'),
-    destination: destination,
-    title: title,
-    startDate: startDate,
-    endDate: endDate,
-    budget: budget,
-  );
-  trips = [...trips, trip];
-  activeTripId = trip.id;
-  await _save();
-}
-```
-
-The method creates a trip, makes it active, saves everything locally, then notifies listeners.
-
-Example from `AddExpenseScreen`:
+Example from Add Expense:
 
 ```dart
 await store.addExpense(
@@ -329,26 +398,7 @@ await store.addExpense(
 );
 ```
 
-The store attaches the expense to the active trip:
-
-```dart
-final transaction = Transaction(
-  id: _createId('transaction'),
-  tripId: trip.id,
-  title: title,
-  amount: amount,
-  date: date,
-  expenseType: expenseType,
-  category: category,
-  iconAsset: expenseType.name,
-);
-transactions = [...transactions, transaction];
-await _save();
-```
-
-The important field is `tripId`. It is what lets Budget show only the expenses for the current active trip.
-
-Example from `EditProfileScreen`:
+Example from Edit Profile:
 
 ```dart
 await context.read<AppStore>().updateProfile(
@@ -358,180 +408,122 @@ await context.read<AppStore>().updateProfile(
 );
 ```
 
-Example from `NotificationsScreen`:
+Using `watch` inside event handlers is unnecessary because the handler does not need to rebuild. Using `read` in a widget that displays changing data would not rebuild when the data changes. That split keeps rebuilds predictable.
+
+## Error Handling
+
+Firebase repository classes catch Firebase exceptions and map them to app-level exceptions:
 
 ```dart
-(v) => context.read<AppStore>().updatePreferences(
-  pushNotificationsEnabled: v,
-)
-```
-
-Only the store decides how to save data. Screens only call intent-level methods.
-
-## Why Both `watch` And `read` Are Used
-
-Use `watch` when the widget needs to rebuild:
-
-```dart
-final store = context.watch<AppStore>();
-```
-
-Use `read` when handling an action:
-
-```dart
-await context.read<AppStore>().createTrip(...);
-```
-
-Using `watch` inside event handlers is unnecessary because the handler does not need to rebuild. Using `read` in a widget that displays changing data would not rebuild when the data changes.
-
-That split keeps rebuilds predictable.
-
-## Model Changes
-
-### Trip
-
-`Trip` is intentionally small:
-
-```dart
-class Trip {
-  final String id;
-  final String destination;
-  final String title;
-  final DateTime startDate;
-  final DateTime endDate;
-  final double budget;
+AppException _mapError(FirebaseException e) {
+  if (e.code == 'unavailable' || e.code == 'network-request-failed') {
+    return const NetworkException();
+  }
+  return const UnknownException();
 }
 ```
 
-It stores only what the current Add Trip and Home/Budget flows need.
+`AppStore` catches `AppException`, stores `errorMessage`, and notifies listeners. Auth-specific errors are stored on `AuthProvider.error`.
 
-### Transaction
+## Models
 
-`Transaction` now has `tripId`:
-
-```dart
-class Transaction {
-  final String id;
-  final String tripId;
-  final String title;
-  final double amount;
-  final DateTime date;
-  final ExpenseType expenseType;
-  final TransactionCategory category;
-  final String iconAsset;
-}
-```
-
-This is the smallest relationship needed for trip-specific expenses.
-
-### UserProfile And UserPreferences
+### UserProfile
 
 `UserProfile` stores:
 
-- name
-- email
-- avatar URL
+- `name`
+- `email`
+- `avatarUrl`
 
-`UserPreferences` stores:
+It is created from the `users/{uid}` document.
 
-- dark mode enabled
-- push notifications enabled
+### UserPreferences
 
-Dark mode is persisted, but the app does not yet use it to switch `ThemeMode`. That was intentionally left out to keep this implementation minimal.
+`UserPreferences` currently stores:
 
-## Screen Behavior After The Change
+- `darkModeEnabled`
+
+The value is written to the user document and read by `VoyageApp` to choose light or dark theme.
+
+### Trip
+
+`Trip` stores:
+
+- `id`
+- `destination`
+- `title`
+- `startDate`
+- `endDate`
+- `budget`
+
+Firestore stores dates as `Timestamp`. `Trip.fromJson()` accepts Firestore timestamps and converts them to `DateTime`.
+
+### Transaction
+
+`Transaction` stores:
+
+- `id`
+- `tripId`
+- `title`
+- `amount`
+- `date`
+- `expenseType`
+- `category`
+- `iconAsset`
+
+`tripId` links a transaction to the active trip and lets Budget filter expenses correctly.
+
+## Screen Behavior
+
+### Login And Register
+
+Login and Register call `AuthProvider`, which delegates to Firebase Auth. Registration also creates the first Firestore user document.
 
 ### Home
 
-Home starts with the existing empty state. After a trip is created, it renders a trip list from `store.trips`.
+Home waits until `AuthGate` has allowed authenticated, loaded state. It then reads `store.trips`.
+
+### Browse Destinations
+
+Browse Destinations reads hardcoded popular destinations from `AppStore.popularDestinations`. Tapping a destination opens Add Trip with that destination prefilled.
 
 ### Add Trip
 
-The form now saves real local state. It creates a trip and returns to the previous screen.
+Add Trip writes a new trip to Firestore through `AppStore.createTrip()`. The new trip becomes the active trip.
 
 ### Budget
 
-Budget shows:
-
-- a message if no trip exists
-- the active trip budget if a trip exists
-- the active trip's expenses
-- category filtering for Dining and Transit
+Budget reads the active trip, active budget, and active trip transactions from `AppStore`.
 
 ### Add Expense
 
-The form now saves an expense to the active trip. If no trip exists, it shows a message asking the user to create one first.
+Add Expense writes a transaction under the active trip. If no active trip exists, it asks the user to create a trip first.
 
-### Profile
+### Profile And Edit Profile
 
-Profile reads from `store.profile`.
-
-### Edit Profile
-
-Edit Profile updates and persists `store.profile`.
+Profile reads `store.profile`. Edit Profile writes profile changes back to the Firestore user document.
 
 ### Settings
 
-The dark mode switch updates and persists `store.preferences.darkModeEnabled`.
-
-### Notifications
-
-Push notifications update and persist `store.preferences.pushNotificationsEnabled`.
-
-Email notifications and app updates remain local screen state because they are not part of the minimal persisted model.
+Settings reads and writes `store.preferences.darkModeEnabled`.
 
 ## Tests
 
-`test/app_store_test.dart` covers the local backend behavior:
+The current widget test covers Provider-backed navigation behavior:
 
-- default profile/preferences load
-- trip creation
-- active trip selection
-- expense creation
-- budget recalculation
-- profile updates
-- preference updates
-- persistence across store instances
+- it builds `BrowseDestinationsScreen` inside a `ChangeNotifierProvider`
+- it supplies `AppStore` with fake repository implementations
+- it taps `Kyoto, Japan`
+- it verifies that Add Trip opens with the destination field prefilled
 
-`test/widget_test.dart` covers Provider-backed UI behavior:
+The fake repositories keep the widget test independent from Firebase services.
 
-- app renders with Provider
-- Home shows a created trip
-- Budget shows an added expense
+## Why This Shape Works
 
-The tests use:
-
-```dart
-SharedPreferences.setMockInitialValues({});
-```
-
-That gives each test a clean in-memory Shared Preferences store.
-
-Widget tests provide the store like this:
-
-```dart
-ChangeNotifierProvider<AppStore>.value(
-  value: store,
-  child: const VoyageApp(),
-)
-```
-
-This mirrors the real app setup while allowing tests to inject a prepared store.
-
-## Why This Is Minimal
-
-This implementation keeps one state object instead of adding multiple layers:
+The current structure keeps UI code readable without hiding the backend:
 
 ```text
-UI -> Provider -> AppStore -> shared_preferences
+screens -> Provider -> AppStore/AuthProvider -> repositories -> Firebase
 ```
 
-There are no separate services, repositories, API clients, database adapters, or diagram-only models.
-
-The store is allowed to be a little more responsible because the app is small. If the project grows, the next natural split would be:
-
-- keep Provider
-- move JSON persistence into a small storage helper
-- split trip/budget/profile logic only when the store becomes hard to understand
-
-For now, one `AppStore` is the clearest tradeoff.
+Screens do not know Firestore collection paths. Repositories do not know widget state. `AppStore` coordinates app data for the UI and keeps derived values like active budget in one place.

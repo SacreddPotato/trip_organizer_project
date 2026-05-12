@@ -5,12 +5,14 @@ class DestinationCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
+  final VoidCallback onTap;
 
   const DestinationCard({
     super.key,
     required this.title,
     required this.subtitle,
     required this.icon,
+    required this.onTap,
   });
 
   @override
@@ -29,6 +31,7 @@ class DestinationCard extends StatelessWidget {
         ],
       ),
       child: ListTile(
+        onTap: onTap,
         contentPadding: const EdgeInsets.all(16),
         leading: Container(
           padding: const EdgeInsets.all(12),

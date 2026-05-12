@@ -46,6 +46,11 @@ class BrowseDestinationsScreen extends StatelessWidget {
                 title: destination.title,
                 subtitle: destination.subtitle,
                 icon: _iconForDestination(destination.iconName),
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  '/add_trip',
+                  arguments: destination.title,
+                ),
               ),
           ],
         ),

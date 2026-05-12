@@ -39,9 +39,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthProvider>(
-          create: (_) => AuthProvider(
-            authRepository: FirebaseAuthRepository(),
-          ),
+          create: (_) => AuthProvider(authRepository: FirebaseAuthRepository()),
         ),
         ChangeNotifierProxyProvider<AuthProvider, AppStore>(
           create: (_) => AppStore(
@@ -50,7 +48,11 @@ void main() async {
           ),
           update: (_, auth, store) {
             if (auth.status == AuthStatus.authenticated && !store!.isLoaded) {
-              store.load(auth.uid!, fallbackName: auth.displayName, fallbackEmail: auth.email);
+              store.load(
+                auth.uid!,
+                fallbackName: auth.displayName,
+                fallbackEmail: auth.email,
+              );
             } else if (auth.status == AuthStatus.unauthenticated &&
                 store!.isLoaded) {
               store.reset();
@@ -69,7 +71,10 @@ class VoyageApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final darkModeEnabled = context.watch<AppStore>().preferences.darkModeEnabled;
+    final darkModeEnabled = context
+        .watch<AppStore>()
+        .preferences
+        .darkModeEnabled;
 
     return MaterialApp(
       title: 'Voyage',
@@ -78,12 +83,21 @@ class VoyageApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: darkModeEnabled ? ThemeMode.dark : ThemeMode.light,
       home: const AuthGate(),
+      onGenerateRoute: (settings) {
+        if (settings.name == '/add_trip') {
+          return MaterialPageRoute<void>(
+            builder: (_) => AddTripScreen(
+              initialDestination: settings.arguments as String?,
+            ),
+          );
+        }
+        return null;
+      },
       routes: {
         '/register': (_) => const RegisterScreen(),
         '/budget': (_) => const BudgetScreen(),
         '/profile': (_) => const ProfileScreen(),
         '/settings': (_) => const SettingsScreen(),
-        '/add_trip': (_) => const AddTripScreen(),
         '/browse_destinations': (_) => const BrowseDestinationsScreen(),
         '/add_expense': (_) => const AddExpenseScreen(),
       },
